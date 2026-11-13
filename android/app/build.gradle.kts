@@ -26,7 +26,7 @@ android {
     defaultConfig {
         applicationId = "com.selim.science"
         minSdk = 23
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
