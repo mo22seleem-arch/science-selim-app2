@@ -38,7 +38,7 @@ class _S extends State<LoginScreen> {
       ElevatedButton(onPressed: _busy ? null : _go, child: _busy ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('تسجيل الدخول')),
       TextButton(onPressed: () => Navigator.push(c, MaterialPageRoute(builder: (_) => const RegisterScreen())),
           child: const Text('ليس لديك حساب؟ أنشئ حساباً', style: TextStyle(color: AppColors.cream))),
-    ])))));
+    ]))))));
 
   Widget _banner(String m) => Container(width: double.infinity, margin: const EdgeInsets.only(bottom: 14), padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(color: AppColors.error.withOpacity(.12), borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.error)),
