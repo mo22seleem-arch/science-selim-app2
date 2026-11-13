@@ -4,7 +4,7 @@ import '../../core/utils/errors.dart';
 import '../../core/utils/validators.dart';
 import 'admin_repository.dart';
 
-const _permLabels = {'content': 'رفع وإدارة المحتوى', 'codes': 'توليد الأكواد', 'sessions': 'مراقبة الجلسات والطلاب', 'settings': 'إعدادات المنصة'};
+const _permLabels = {'content': 'إضافة وتعديل الكورسات والمحتوى', 'codes': 'توليد الأكواد', 'sessions': 'مراقبة الجلسات والطلاب', 'settings': 'إعدادات المنصة'};
 
 /// Super Admin only: manage sub-admins, permissions, device resets, bans.
 class StaffScreen extends StatefulWidget { const StaffScreen({super.key}); @override State<StaffScreen> createState() => _SS(); }

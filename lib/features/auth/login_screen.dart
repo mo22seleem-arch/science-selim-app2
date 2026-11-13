@@ -41,6 +41,6 @@ class _S extends State<LoginScreen> {
     ]))))));
 
   Widget _banner(String m) => Container(width: double.infinity, margin: const EdgeInsets.only(bottom: 14), padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: AppColors.error.withOpacity(.12), borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.error)),
+      decoration: BoxDecoration(color: AppColors.error.withValues(alpha: .12), borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.error)),
       child: Text(m, style: const TextStyle(color: AppColors.error)));
 }

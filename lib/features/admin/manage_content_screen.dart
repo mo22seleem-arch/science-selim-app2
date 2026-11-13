@@ -13,46 +13,90 @@ Future<bool> confirmDelete(BuildContext c, String what) async => (await showDial
   actions: [TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('إلغاء')),
             TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('حذف', style: TextStyle(color: AppColors.error)))])) ?? false);
 
-/// Shared add/edit dialog. Returns {title, desc, free} or null.
-Future<Map<String, dynamic>?> itemDialog(BuildContext c, {required String heading, String? title, String? desc, bool free = false, bool withDesc = false}) {
-  final t = TextEditingController(text: title), d = TextEditingController(text: desc); bool f = free;
+/// Add/edit a UNIT. Returns {title, free} or null.
+Future<Map<String, dynamic>?> itemDialog(BuildContext c, {required String heading, String? title, bool free = false}) {
+  final t = TextEditingController(text: title); bool f = free;
   return showDialog<Map<String, dynamic>>(context: c, builder: (_) => StatefulBuilder(builder: (ctx, set) => AlertDialog(
     backgroundColor: AppColors.surface, title: Text(heading),
     content: Column(mainAxisSize: MainAxisSize.min, children: [
       TextField(controller: t, decoration: const InputDecoration(labelText: 'العنوان')),
-      if (withDesc) ...[const SizedBox(height: 10), TextField(controller: d, maxLines: 2, decoration: const InputDecoration(labelText: 'الوصف (اختياري)'))],
       SwitchListTile(contentPadding: EdgeInsets.zero, title: Text(f ? 'مجاني' : 'مدفوع (يحتاج كود)'), value: f, onChanged: (v) => set(() => f = v)),
     ]),
     actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('إلغاء')),
-      TextButton(onPressed: () { if (t.text.trim().isEmpty) return; Navigator.pop(ctx, {'title': t.text, 'desc': d.text, 'free': f}); }, child: const Text('حفظ'))])));
+      TextButton(onPressed: () { if (t.text.trim().isEmpty) return; Navigator.pop(ctx, {'title': t.text, 'free': f}); }, child: const Text('حفظ'))])));
+}
+
+/// Add/edit a COURSE: stage + title + description + Free/Paid. Returns {grade, title, desc, free} or null.
+Future<Map<String, dynamic>?> courseDialog(BuildContext c, {required int grade, Course? course}) {
+  final t = TextEditingController(text: course?.title), d = TextEditingController(text: course?.description);
+  int g = course?.grade ?? grade; bool free = course?.free ?? false; String? err;
+  return showDialog<Map<String, dynamic>>(context: c, builder: (_) => StatefulBuilder(builder: (ctx, set) => AlertDialog(
+    backgroundColor: AppColors.surface, title: Text(course == null ? 'كورس جديد' : 'تعديل الكورس'),
+    content: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      const Text('المرحلة الدراسية', style: TextStyle(color: AppColors.muted)),
+      const SizedBox(height: 6),
+      Wrap(spacing: 8, runSpacing: 6, children: [for (final x in Grades.all)
+        ChoiceChip(label: Text(Grades.label(x)), selected: g == x, onSelected: (_) => set(() => g = x))]),
+      const SizedBox(height: 14),
+      TextField(controller: t, decoration: const InputDecoration(labelText: 'اسم الكورس')),
+      const SizedBox(height: 10),
+      TextField(controller: d, maxLines: 2, decoration: const InputDecoration(labelText: 'الوصف (اختياري)')),
+      const SizedBox(height: 14),
+      const Text('نوع الكورس', style: TextStyle(color: AppColors.muted)),
+      const SizedBox(height: 6),
+      SegmentedButton<bool>(
+        segments: const [ButtonSegment(value: true, label: Text('مجاني'), icon: Icon(Icons.lock_open)),
+                         ButtonSegment(value: false, label: Text('مدفوع'), icon: Icon(Icons.lock_outline))],
+        selected: {free}, onSelectionChanged: (s) => set(() => free = s.first)),
+      Padding(padding: const EdgeInsets.only(top: 6), child: Text(free ? 'متاح لكل الطلاب المسجلين' : 'يحتاج كود تفعيل لفتحه',
+          style: const TextStyle(color: AppColors.muted, fontSize: 12))),
+      if (err != null) Padding(padding: const EdgeInsets.only(top: 8), child: Text(err!, style: const TextStyle(color: AppColors.error))),
+    ])),
+    actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('إلغاء')),
+      TextButton(onPressed: () {
+        if (t.text.trim().isEmpty) { set(() => err = 'اكتب اسم الكورس'); return; }
+        Navigator.pop(ctx, {'grade': g, 'title': t.text, 'desc': d.text, 'free': free});
+      }, child: const Text('حفظ'))])));
 }
 
 class ManageContentScreen extends StatefulWidget { const ManageContentScreen({super.key}); @override State<ManageContentScreen> createState() => _MC(); }
-class _MC extends State<ManageContentScreen> {
+class _MC extends State<ManageContentScreen> with SingleTickerProviderStateMixin {
   final _repo = CoursesRepository(), _admin = AdminRepository();
+  late final TabController _tabs = TabController(length: Grades.all.length, vsync: this);
   late Future<List<Course>> _f = _repo.courses();
   void _reload() => setState(() => _f = _repo.courses());
   void _toast(Object e) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errText(e))));
+  @override void dispose() { _tabs.dispose(); super.dispose(); }
 
   Future<void> _edit([Course? co]) async {
-    final r = await itemDialog(context, heading: co == null ? 'كورس جديد' : 'تعديل الكورس', title: co?.title, desc: co?.description, free: co?.free ?? false, withDesc: true);
+    final r = await courseDialog(context, grade: Grades.all[_tabs.index], course: co);   // defaults to the tab you're on
     if (r == null) return;
-    try { await _admin.saveCourse(id: co?.id, title: r['title'], description: r['desc'], free: r['free']); _reload(); } catch (e) { _toast(e); }
+    try {
+      await _admin.saveCourse(id: co?.id, grade: r['grade'], title: r['title'], description: r['desc'], free: r['free']);
+      _reload();
+    } catch (e) { _toast(e); }
   }
 
-  @override Widget build(BuildContext c) => Scaffold(
-    appBar: AppBar(title: const Text('إدارة الكورسات')),
-    floatingActionButton: FloatingActionButton.extended(onPressed: _edit, icon: const Icon(Icons.add), label: const Text('كورس')),
-    body: FutureBuilder<List<Course>>(future: _f, builder: (_, s) {
-      if (!s.hasData) return const Center(child: CircularProgressIndicator());
-      if (s.data!.isEmpty) return const Center(child: Text('أضف أول كورس'));
-      return ListView(padding: const EdgeInsets.fromLTRB(16, 16, 16, 90), children: [for (final co in s.data!) Card(
-        color: AppColors.surface, child: ListTile(title: Text(co.title), subtitle: Padding(padding: const EdgeInsets.only(top: 6), child: Align(alignment: Alignment.centerRight, child: badge(co.free ? 'مجاني' : 'مدفوع'))),
-          onTap: () async { await Navigator.push(c, MaterialPageRoute(builder: (_) => ManageUnitsScreen(course: co))); },
+  Widget _list(List<Course> list, int g) => list.isEmpty
+    ? ListView(children: [const SizedBox(height: 120), Center(child: Text('لا توجد كورسات في ${Grades.label(g)} بعد\nاضغط "كورس جديد" لإضافة أول كورس',
+        textAlign: TextAlign.center, style: const TextStyle(color: AppColors.muted)))])
+    : ListView(padding: const EdgeInsets.fromLTRB(16, 16, 16, 90), children: [for (final co in list) Card(color: AppColors.surface,
+        child: ListTile(title: Text(co.title),
+          subtitle: Padding(padding: const EdgeInsets.only(top: 6), child: Align(alignment: Alignment.centerRight, child: badge(co.free ? 'مجاني' : 'مدفوع'))),
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ManageUnitsScreen(course: co))),
           trailing: PopupMenuButton<String>(onSelected: (v) async {
             if (v == 'e') { _edit(co); }
-            else if (await confirmDelete(c, co.title)) { try { await _admin.deleteCourse(co.id); _reload(); } catch (e) { _toast(e); } }
+            else if (await confirmDelete(context, co.title)) { try { await _admin.deleteCourse(co.id); _reload(); } catch (e) { _toast(e); } }
           }, itemBuilder: (_) => const [PopupMenuItem(value: 'e', child: Text('تعديل')), PopupMenuItem(value: 'd', child: Text('حذف'))])))]);
+
+  @override Widget build(BuildContext c) => Scaffold(
+    appBar: AppBar(title: const Text('إدارة الكورسات'),
+        bottom: TabBar(controller: _tabs, tabs: [for (final g in Grades.all) Tab(text: Grades.label(g))])),
+    floatingActionButton: FloatingActionButton.extended(onPressed: _edit, icon: const Icon(Icons.add), label: const Text('كورس جديد')),
+    body: FutureBuilder<List<Course>>(future: _f, builder: (_, s) {
+      if (s.hasError) return const Center(child: Text('تعذر تحميل الكورسات'));
+      if (!s.hasData) return const Center(child: CircularProgressIndicator());
+      return TabBarView(controller: _tabs, children: [for (final g in Grades.all) _list(s.data!.where((x) => x.grade == g).toList(), g)]);
     }));
 }
 

@@ -7,7 +7,7 @@ import 'core/theme/app_theme.dart';
 import 'features/auth/auth_repository.dart';
 import 'features/auth/login_screen.dart';
 import 'features/auth/session_guard.dart';
-import 'features/courses/courses_screen.dart';
+import 'features/courses/grades_screen.dart';
 
 // flutter run --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...
 const _url = String.fromEnvironment('SUPABASE_URL');
@@ -50,5 +50,5 @@ class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
   @override Widget build(BuildContext c) => FutureBuilder<Map<String, dynamic>>(
     future: AuthRepository().myProfile(),
-    builder: (_, s) => s.hasData ? CoursesScreen(profile: s.data!) : const _Splash());
+    builder: (_, s) => s.hasData ? GradesScreen(profile: s.data!) : const _Splash());
 }

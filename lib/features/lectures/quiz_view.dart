@@ -38,7 +38,7 @@ class _QV extends State<QuizView> {
   Widget _summary(BuildContext c) {
     final ok = _result!['passed'] == true;
     return Container(margin: const EdgeInsets.only(bottom: 16), padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(color: (ok ? Colors.green : AppColors.error).withOpacity(.14), borderRadius: BorderRadius.circular(16),
+      decoration: BoxDecoration(color: (ok ? Colors.green : AppColors.error).withValues(alpha: .14), borderRadius: BorderRadius.circular(16),
           border: Border.all(color: ok ? Colors.greenAccent : AppColors.error)),
       child: Column(children: [
         Text('${_result!['score']}%', style: Theme.of(c).textTheme.displaySmall?.copyWith(fontWeight: FontWeight.w800)),
@@ -65,7 +65,7 @@ class _QV extends State<QuizView> {
     return Padding(padding: const EdgeInsets.only(top: 6), child: InkWell(borderRadius: BorderRadius.circular(12),
       onTap: rev != null ? null : () => setState(() => _ans[id] = k),
       child: Container(padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), border: Border.all(color: border ?? AppColors.cream.withOpacity(.2))),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), border: Border.all(color: border ?? AppColors.cream.withValues(alpha: .2))),
         child: Row(children: [Icon(icon, size: 20, color: border ?? AppColors.muted), const SizedBox(width: 10), Expanded(child: Text(text))]))));
   }
 }

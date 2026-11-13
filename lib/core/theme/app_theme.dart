@@ -22,10 +22,10 @@ ThemeData buildSpaceTheme() {
     colorScheme: const ColorScheme.dark(
         primary: AppColors.accent, onPrimary: AppColors.midnight,
         surface: AppColors.surface, onSurface: AppColors.cream, error: AppColors.error),
-    inputDecorationTheme: InputDecorationTheme(
+    inputDecorationTheme: InputDecorationThemeData(
       filled: true, fillColor: AppColors.surface,
       labelStyle: const TextStyle(color: AppColors.muted),
-      enabledBorder: border(AppColors.cream.withOpacity(.25)),
+      enabledBorder: border(AppColors.cream.withValues(alpha: .25)),
       focusedBorder: border(AppColors.cream, 1.6),
       errorBorder: border(AppColors.error), focusedErrorBorder: border(AppColors.error, 1.6),
     ),
@@ -36,7 +36,7 @@ ThemeData buildSpaceTheme() {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         textStyle: GoogleFonts.cairo(fontWeight: FontWeight.w700, fontSize: 16)),
     ),
-    appBarTheme: const AppBarTheme(
+    appBarTheme: const AppBarThemeData(
         backgroundColor: AppColors.midnight, foregroundColor: AppColors.cream, elevation: 0),
   );
 }

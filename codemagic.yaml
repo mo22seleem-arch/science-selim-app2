@@ -1,0 +1,50 @@
+# ضع هذا الملف في جذر المشروع (بجوار pubspec.yaml) باسم codemagic.yaml
+# متغيرات البيئة المطلوبة (Codemagic > App > Environment variables > Group اسمه "supabase"):
+#   SUPABASE_URL        = https://xxxx.supabase.co
+#   SUPABASE_ANON_KEY   = (anon public key)
+
+workflows:
+
+  # ---------- 1) للتجربة السريعة على الموبايل (Debug APK) ----------
+  android-debug-apk:
+    name: Android Debug APK
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      flutter: stable
+      java: 17
+      groups:
+        - supabase
+    scripts:
+      - name: Get packages
+        script: flutter pub get
+      - name: Build debug APK
+        script: |
+          flutter build apk --debug \
+            --dart-define=SUPABASE_URL=$SUPABASE_URL \
+            --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
+    artifacts:
+      - build/app/outputs/flutter-apk/*.apk
+
+  # ---------- 2) نسخة قريبة من النهائية (Release APK، مشفّرة ومصغّرة) ----------
+  android-release-apk:
+    name: Android Release APK
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      flutter: stable
+      java: 17
+      groups:
+        - supabase
+    scripts:
+      - name: Get packages
+        script: flutter pub get
+      - name: Build release APK
+        script: |
+          flutter build apk --release \
+            --obfuscate --split-debug-info=build/symbols \
+            --dart-define=SUPABASE_URL=$SUPABASE_URL \
+            --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
+    artifacts:
+      - build/app/outputs/flutter-apk/*.apk
+      - build/symbols/**

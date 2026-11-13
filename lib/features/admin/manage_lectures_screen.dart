@@ -22,7 +22,7 @@ class _ML extends State<ManageLecturesScreen> {
       content: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
         TextField(controller: title, decoration: const InputDecoration(labelText: 'عنوان المحاضرة')),
         const SizedBox(height: 12),
-        DropdownButtonFormField<String>(value: provider, decoration: const InputDecoration(labelText: 'مصدر الفيديو'),
+        DropdownButtonFormField<String>(initialValue: provider, decoration: const InputDecoration(labelText: 'مصدر الفيديو'),
           items: const [DropdownMenuItem(value: 'bunny', child: Text('Bunny.net (Video ID — موقّع)')), DropdownMenuItem(value: 'hls', child: Text('رابط HLS مباشر (غير موقّع)'))],
           onChanged: (v) => set(() => provider = v!)),
         const SizedBox(height: 12),

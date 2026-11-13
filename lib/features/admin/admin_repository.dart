@@ -4,15 +4,23 @@ class AdminRepository {
   final _db = Supabase.instance.client;
 
   // ---- content ----
-  Future<void> saveCourse({String? id, required String title, String? description, required bool free}) async {
-    final row = {'title': title.trim(), 'description': description?.trim(), 'access': free ? 'free' : 'paid'};
-    id == null ? await _db.from('courses').insert(row) : await _db.from('courses').update(row).eq('id', id);
+  Future<void> saveCourse({String? id, required int grade, required String title, String? description, required bool free}) async {
+    final row = {'grade': grade, 'title': title.trim(), 'description': description?.trim(), 'access': free ? 'free' : 'paid'};
+    if (id == null) {
+      await _db.from('courses').insert(row);
+    } else {
+      await _db.from('courses').update(row).eq('id', id);
+    }
   }
   Future<void> deleteCourse(String id) => _db.from('courses').delete().eq('id', id);
 
   Future<void> saveUnit({String? id, required String courseId, required String title, required bool free}) async {
     final row = {'course_id': courseId, 'title': title.trim(), 'access': free ? 'free' : 'paid'};
-    id == null ? await _db.from('units').insert(row) : await _db.from('units').update(row).eq('id', id);
+    if (id == null) {
+      await _db.from('units').insert(row);
+    } else {
+      await _db.from('units').update(row).eq('id', id);
+    }
   }
   Future<void> deleteUnit(String id) => _db.from('units').delete().eq('id', id);
 

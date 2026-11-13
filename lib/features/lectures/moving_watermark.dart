@@ -26,7 +26,7 @@ class _MS extends State<_Mark> {
   @override Widget build(BuildContext c) => AnimatedAlign(alignment: _a, duration: const Duration(milliseconds: 900), curve: Curves.easeInOut,
     child: Directionality(textDirection: TextDirection.ltr, child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(color: Colors.black.withOpacity(.18), borderRadius: BorderRadius.circular(6)),
-      child: Text(widget.text, style: TextStyle(color: Colors.white.withOpacity(widget.opacity + .12), fontSize: widget.size, fontWeight: FontWeight.w600,
+      decoration: BoxDecoration(color: Colors.black.withValues(alpha: .18), borderRadius: BorderRadius.circular(6)),
+      child: Text(widget.text, style: TextStyle(color: Colors.white.withValues(alpha: widget.opacity + .12), fontSize: widget.size, fontWeight: FontWeight.w600,
           shadows: const [Shadow(blurRadius: 3, color: Colors.black87)])))));
 }

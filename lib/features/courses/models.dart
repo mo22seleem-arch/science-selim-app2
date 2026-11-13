@@ -1,8 +1,15 @@
+/// Exactly three fixed stages. No DB table: the database enforces grade IN (1,2,3).
+class Grades {
+  static const all = [1, 2, 3];
+  static const _names = {1: 'الأول الإعدادي', 2: 'الثاني الإعدادي', 3: 'الثالث الإعدادي'};
+  static String label(int g) => _names[g] ?? '';
+}
+
 class Course {
-  final String id, title; final String? description; final bool free;
-  Course(this.id, this.title, this.description, this.free);
+  final String id, title; final String? description; final bool free; final int grade;
+  Course(this.id, this.title, this.description, this.free, this.grade);
   factory Course.fromMap(Map<String, dynamic> m) =>
-      Course(m['id'], m['title'], m['description'], m['access'] == 'free');
+      Course(m['id'], m['title'], m['description'], m['access'] == 'free', (m['grade'] as num?)?.toInt() ?? 1);
 }
 
 class Unit {

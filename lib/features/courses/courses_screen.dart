@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
-import '../admin/admin_dashboard.dart';
-import '../auth/auth_repository.dart';
 import 'courses_repository.dart';
 import 'models.dart';
 import 'units_screen.dart';
@@ -9,32 +7,28 @@ import 'units_screen.dart';
 Widget badge(String t, {bool filled = false}) => Container(
   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
   decoration: BoxDecoration(color: filled ? AppColors.cream : Colors.transparent,
-      border: Border.all(color: AppColors.cream.withOpacity(.6)), borderRadius: BorderRadius.circular(20)),
+      border: Border.all(color: AppColors.cream.withValues(alpha: .6)), borderRadius: BorderRadius.circular(20)),
   child: Text(t, style: TextStyle(fontSize: 12, color: filled ? AppColors.midnight : AppColors.cream)));
 
+/// Courses of ONE stage.
 class CoursesScreen extends StatefulWidget {
-  final Map<String, dynamic> profile;
-  const CoursesScreen({super.key, required this.profile});
+  final int grade;
+  const CoursesScreen({super.key, required this.grade});
   @override State<CoursesScreen> createState() => _CS();
 }
 class _CS extends State<CoursesScreen> {
   final _repo = CoursesRepository();
   late Future<(List<Course>, Access)> _f = _load();
-  Future<(List<Course>, Access)> _load() async => (await _repo.courses(), await _repo.access());
-  bool get _staff => widget.profile['role'] != 'student';
+  Future<(List<Course>, Access)> _load() async => (await _repo.courses(grade: widget.grade), await _repo.access());
 
   @override Widget build(BuildContext c) => Scaffold(
-    appBar: AppBar(title: const Text('الكورسات'), actions: [
-      if (_staff) IconButton(tooltip: 'لوحة التحكم', icon: const Icon(Icons.admin_panel_settings_outlined),
-          onPressed: () => Navigator.push(c, MaterialPageRoute(builder: (_) => AdminDashboard(profile: widget.profile)))),
-      IconButton(tooltip: 'خروج', icon: const Icon(Icons.logout), onPressed: () => AuthRepository().signOut()),
-    ]),
+    appBar: AppBar(title: Text(Grades.label(widget.grade))),
     body: RefreshIndicator(onRefresh: () async { setState(() => _f = _load()); await _f; },
       child: FutureBuilder<(List<Course>, Access)>(future: _f, builder: (_, s) {
         if (s.connectionState != ConnectionState.done) return const Center(child: CircularProgressIndicator());
         if (s.hasError) return ListView(children: const [SizedBox(height: 120), Center(child: Text('تعذر تحميل الكورسات'))]);
         final (courses, access) = s.data!;
-        if (courses.isEmpty) return ListView(children: const [SizedBox(height: 120), Center(child: Text('لا توجد كورسات بعد'))]);
+        if (courses.isEmpty) return ListView(children: const [SizedBox(height: 120), Center(child: Text('لا توجد كورسات في هذه المرحلة بعد'))]);
         return ListView.separated(padding: const EdgeInsets.all(16), itemCount: courses.length,
           separatorBuilder: (_, __) => const SizedBox(height: 12),
           itemBuilder: (_, i) {

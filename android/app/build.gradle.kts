@@ -15,7 +15,7 @@ if (hasKeystore) keystoreProperties.load(FileInputStream(keystorePropertiesFile)
 
 android {
     namespace = "com.selim.science"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36   // some plugins/AndroidX need >= 36 (was flutter.compileSdkVersion)
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
