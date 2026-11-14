@@ -39,7 +39,7 @@ Create the keystore once: `keytool -genkey -v -keystore upload-keystore.jks -key
 `android/key.properties.example` to `android/key.properties`. **Back up the keystore** (losing it = no more updates).
 
 ## 2) Supabase
-- `supabase/phase5.sql`
+- `supabase/full_setup.sql` (يشمل كل المراحل)
 - `supabase functions deploy verify-integrity`
 - `supabase secrets set GOOGLE_SA_JSON='<service account json>' PLAY_PACKAGE_NAME=com.selim.science`
 - Enforcement is OFF until you decide: `supabase secrets set INTEGRITY_ENFORCE=true` (do this only after the app is live on Play, see 3).

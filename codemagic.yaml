@@ -2,6 +2,9 @@
 # متغيرات البيئة المطلوبة (Codemagic > App > Environment variables > Group اسمه "supabase"):
 #   SUPABASE_URL        = https://xxxx.supabase.co
 #   SUPABASE_ANON_KEY   = (anon public key)
+#
+# تثبيت نسخة Flutter: بعد أول build ناجح افتح خطوة "Flutter version" في الـ log وانسخ الرقم
+# (مثلاً 3.47.2) وضعه بدل stable في السطرين تحت، حتى لا ينكسر البناء عند صدور تحديث جديد.
 
 workflows:
 
@@ -16,6 +19,10 @@ workflows:
       groups:
         - supabase
     scripts:
+      - name: Flutter version (للتثبيت لاحقاً)
+        script: flutter --version
+      - name: Fetch Amiri font (يحمّل الخط ويدمجه)
+        script: bash tool/fetch_fonts.sh
       - name: Get packages
         script: flutter pub get
       - name: Build debug APK
@@ -37,6 +44,10 @@ workflows:
       groups:
         - supabase
     scripts:
+      - name: Flutter version (للتثبيت لاحقاً)
+        script: flutter --version
+      - name: Fetch Amiri font (يحمّل الخط ويدمجه)
+        script: bash tool/fetch_fonts.sh
       - name: Get packages
         script: flutter pub get
       - name: Build release APK
@@ -44,7 +55,8 @@ workflows:
           flutter build apk --release \
             --obfuscate --split-debug-info=build/symbols \
             --dart-define=SUPABASE_URL=$SUPABASE_URL \
-            --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
+            --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY \
+            --dart-define=GCP_PROJECT_NUMBER=${GCP_PROJECT_NUMBER:-}
     artifacts:
       - build/app/outputs/flutter-apk/*.apk
       - build/symbols/**

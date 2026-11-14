@@ -10,7 +10,7 @@ class SessionGuard with WidgetsBindingObserver {
   /// LoginScreen shows the "logged in from another device" message when true.
   static final kicked = ValueNotifier<bool>(false);
 
-  StreamSubscription? _sub;
+  StreamSubscription? _sub; Timer? _poll;
   final _db = Supabase.instance.client;
 
   void start() {
@@ -21,6 +21,7 @@ class SessionGuard with WidgetsBindingObserver {
     _sub = _db.from('profiles').stream(primaryKey: ['id']).eq('id', uid).listen((rows) {
       if (rows.isNotEmpty) _check(rows.first['active_device_id'] as String?, rows.first['is_banned'] == true);
     });
+    _poll = Timer.periodic(const Duration(seconds: 45), (_) => verifyNow());   // safety net if Realtime is unavailable
     verifyNow();
   }
 
@@ -49,5 +50,5 @@ class SessionGuard with WidgetsBindingObserver {
     if (s == AppLifecycleState.resumed) verifyNow();   // covers offline -> back online
   }
 
-  void stop() { _sub?.cancel(); _sub = null; WidgetsBinding.instance.removeObserver(this); }
+  void stop() { _sub?.cancel(); _sub = null; _poll?.cancel(); _poll = null; WidgetsBinding.instance.removeObserver(this); }
 }

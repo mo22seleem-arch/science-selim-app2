@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 import '../admin/admin_dashboard.dart';
 import '../auth/auth_repository.dart';
+import '../auth/change_password.dart';
 import 'courses_repository.dart';
 import 'courses_screen.dart';
 import 'models.dart';
@@ -24,6 +25,7 @@ class _GS extends State<GradesScreen> {
       appBar: AppBar(title: const Text('العلوم مع محمد سليم'), actions: [
         if (_staff) IconButton(tooltip: 'لوحة التحكم', icon: const Icon(Icons.admin_panel_settings_outlined),
             onPressed: () => Navigator.push(c, MaterialPageRoute(builder: (_) => AdminDashboard(profile: widget.profile)))),
+        IconButton(tooltip: 'تغيير كلمة المرور', icon: const Icon(Icons.lock_reset), onPressed: () => showChangePasswordDialog(c)),
         IconButton(tooltip: 'خروج', icon: const Icon(Icons.logout), onPressed: () => AuthRepository().signOut()),
       ]),
       body: RefreshIndicator(onRefresh: () async { _reload(); await _f; }, child: FutureBuilder<Map<int, int>>(future: _f, builder: (_, s) {

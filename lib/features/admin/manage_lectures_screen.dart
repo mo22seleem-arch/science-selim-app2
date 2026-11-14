@@ -1,5 +1,6 @@
-import 'package:file_picker/file_picker.dart';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import '../../core/services/native_bridge.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/errors.dart';
 import '../courses/models.dart';
@@ -16,7 +17,7 @@ class _ML extends State<ManageLecturesScreen> {
 
   Future<void> _edit([Lecture? l, int count = 0]) async {
     final title = TextEditingController(text: l?.title), ref = TextEditingController(text: l?.videoRef);
-    String provider = l?.provider ?? 'bunny'; PlatformFile? pdf; bool removePdf = false;
+    String provider = l?.provider ?? 'bunny'; ({String name, Uint8List bytes})? pdf; bool removePdf = false;
     final ok = await showDialog<bool>(context: context, builder: (_) => StatefulBuilder(builder: (ctx, set) => AlertDialog(
       backgroundColor: AppColors.surface, title: Text(l == null ? 'محاضرة جديدة' : 'تعديل المحاضرة'),
       content: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
@@ -30,14 +31,14 @@ class _ML extends State<ManageLecturesScreen> {
         const SizedBox(height: 12),
         OutlinedButton.icon(icon: const Icon(Icons.picture_as_pdf_outlined),
           label: Text(pdf != null ? pdf!.name : (l?.hasPdf == true && !removePdf ? 'استبدال الملزمة PDF' : 'رفع ملزمة PDF')),
-          onPressed: () async { final r = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['pdf'], withData: true); if (r != null) set(() { pdf = r.files.single; removePdf = false; }); }),
+          onPressed: () async { final r = await NativeBridge.pickPdf(); if (r != null) set(() { pdf = r; removePdf = false; }); }),
         if (l?.hasPdf == true && pdf == null) CheckboxListTile(contentPadding: EdgeInsets.zero, value: removePdf, title: const Text('حذف الملزمة الحالية'), onChanged: (v) => set(() => removePdf = v!)),
       ])),
       actions: [TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('إلغاء')), TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('حفظ'))])));
     if (ok != true || title.text.trim().isEmpty) return;
     try {
       final id = await _repo.saveLecture(id: l?.id, unitId: widget.unit.id, title: title.text, provider: provider, videoRef: ref.text, order: l == null ? count : 0);
-      if (pdf?.bytes != null) { await _repo.uploadPdf(id, pdf!.bytes!); }
+      if (pdf != null) { await _repo.uploadPdf(id, pdf!.bytes); }
       else if (removePdf && l != null) { await _repo.removePdf(l); }
       _reload();
     } catch (e) { _toast(e); }

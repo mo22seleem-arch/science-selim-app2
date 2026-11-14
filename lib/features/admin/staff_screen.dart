@@ -43,6 +43,20 @@ class _SS extends State<StaffScreen> {
     if (u != null) await _editPerms(u);
   }
 
+  Future<void> _resetPassword(Map<String, dynamic> u) async {
+    final t = TextEditingController(); String? err;
+    final pw = await showDialog<String>(context: context, builder: (_) => StatefulBuilder(builder: (ctx, set) => AlertDialog(
+      backgroundColor: AppColors.surface, title: Text('كلمة مرور جديدة: ${u['full_name']}'),
+      content: Column(mainAxisSize: MainAxisSize.min, children: [
+        TextField(controller: t, textDirection: TextDirection.ltr, decoration: InputDecoration(labelText: 'كلمة المرور الجديدة (8 أحرف على الأقل، حروف وأرقام)', errorText: err)),
+        const SizedBox(height: 8), const Text('سلّمها للطالب، وسيُسجَّل خروجه من أي جهاز.', style: TextStyle(color: AppColors.muted, fontSize: 12)),
+      ]),
+      actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('إلغاء')),
+        TextButton(onPressed: () { final e = Validators.password(t.text); if (e != null) { set(() => err = e); return; } Navigator.pop(ctx, t.text); }, child: const Text('حفظ'))])));
+    if (pw == null) return;
+    try { await _admin.resetPassword(u['id'], pw); _toast('تم تعيين كلمة المرور الجديدة'); } catch (e) { _toast(errText(e)); }
+  }
+
   Future<void> _studentAction() async {
     final u = await _askPhone('إجراء على طالب');
     if (u == null || !mounted) return;
@@ -50,9 +64,11 @@ class _SS extends State<StaffScreen> {
     final a = await showModalBottomSheet<String>(context: context, backgroundColor: AppColors.surface, builder: (ctx) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
       ListTile(title: Text(u['full_name']), subtitle: Text(u['phone'], textDirection: TextDirection.ltr)),
       ListTile(leading: const Icon(Icons.phonelink_erase), title: const Text('إعادة ضبط ارتباط الجهاز'), onTap: () => Navigator.pop(ctx, 'reset')),
+      ListTile(leading: const Icon(Icons.password), title: const Text('تعيين كلمة مرور جديدة'), onTap: () => Navigator.pop(ctx, 'pw')),
       ListTile(leading: Icon(banned ? Icons.lock_open : Icons.block), title: Text(banned ? 'رفع الحظر' : 'حظر الحساب'), onTap: () => Navigator.pop(ctx, 'ban')),
     ])));
     try {
+      if (a == 'pw') { await _resetPassword(u); }
       if (a == 'reset') { await _admin.resetDevice(u['id']); _toast('تمت إعادة الضبط وتسجيل خروج الطالب'); }
       if (a == 'ban') { await _admin.setBan(u['id'], !banned); _toast(banned ? 'تم رفع الحظر' : 'تم حظر الحساب'); }
     } catch (e) { _toast(errText(e)); }

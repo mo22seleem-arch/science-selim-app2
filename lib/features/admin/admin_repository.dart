@@ -52,5 +52,10 @@ class AdminRepository {
   Future<void> setRole(String userId, String role, List<String> perms) =>
       _db.rpc('admin_set_role', params: {'p_user': userId, 'p_role': role, 'p_perms': perms});
   Future<void> resetDevice(String userId) => _db.rpc('admin_reset_device', params: {'p_user': userId});
+  /// Owner only (Edge Function re-checks): sets a new password and logs the student out everywhere.
+  Future<void> resetPassword(String userId, String password) async {
+    final r = await _db.functions.invoke('admin-reset-password', body: {'user_id': userId, 'password': password});
+    if (r.data is! Map || r.data['ok'] != true) throw Exception('reset_failed');
+  }
   Future<void> setBan(String userId, bool ban) => _db.rpc('admin_set_ban', params: {'p_user': userId, 'p_ban': ban});
 }

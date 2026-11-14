@@ -7,7 +7,7 @@ class AuditScreen extends StatelessWidget {
   const AuditScreen({super.key});
   static const _ar = {
     'codes.generate': 'توليد أكواد', 'codes.revoke': 'إلغاء كود', 'student.device_reset': 'إعادة ضبط جهاز طالب',
-    'student.ban': 'حظر طالب', 'student.unban': 'رفع حظر', 'staff.set_role': 'تعديل مشرف',
+    'student.ban': 'حظر طالب', 'student.password_reset': 'إعادة تعيين كلمة مرور طالب', 'student.unban': 'رفع حظر', 'staff.set_role': 'تعديل مشرف',
     'device.switch': 'تغيير جهاز (إشارة مشاركة حساب)',
   };
   String _label(String a) {

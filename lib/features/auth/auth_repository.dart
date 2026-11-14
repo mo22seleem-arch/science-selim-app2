@@ -37,6 +37,7 @@ class AuthRepository {
     if (m.contains('already registered') || m.contains('already exists')) return 'هذا الرقم مسجل بالفعل';
     if (m.contains('invalid login')) return 'رقم الهاتف أو كلمة المرور غير صحيحة';
     if (m.contains('banned')) return 'هذا الحساب موقوف';
+    if (m.contains('database error')) return 'تعذر إنشاء الحساب. راجع الاسم والرقم، أو تأكد أن المالك سجّل أولاً';
     return 'حدث خطأ، حاول مرة أخرى';
   }
 }

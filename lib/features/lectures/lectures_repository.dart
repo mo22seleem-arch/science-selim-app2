@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/security/security_service.dart';
 import '../../core/services/device_service.dart';
@@ -50,9 +51,9 @@ class LecturesRepository {
     if (id == null) return (await _db.from('lectures').insert(row).select('id').single())['id'];
     await _db.from('lectures').update(row).eq('id', id); return id;
   }
-  Future<void> uploadPdf(String lectureId, List<int> bytes) async {
+  Future<void> uploadPdf(String lectureId, Uint8List bytes) async {
     final path = '$lectureId/${DateTime.now().millisecondsSinceEpoch}.pdf';
-    await _db.storage.from('lecture-pdfs').uploadBinary(path, bytes as dynamic,
+    await _db.storage.from('lecture-pdfs').uploadBinary(path, bytes,
         fileOptions: const FileOptions(contentType: 'application/pdf', upsert: true));
     await _db.from('lectures').update({'pdf_path': path}).eq('id', lectureId);
   }
